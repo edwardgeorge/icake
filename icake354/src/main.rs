@@ -1,3 +1,4 @@
+#[derive(Debug)]
 struct BinaryTreeNode<A> {
     value: A,
     left: Option<Box<BinaryTreeNode<A>>>,
@@ -67,12 +68,26 @@ fn second_largest<A>(input: &BinaryTreeNode<A>) -> Option<&A> {
         second = Some(&cur.value);
         cur = next.as_ref();
     }
+    // if this is the last right-most node with no right child,
+    // then find the last right-most child of the left node if it exists...
+    if let Some(left) = &cur.left {
+        cur = left.as_ref();
+        while let Some(n) = &cur.right {
+            cur = n.as_ref();
+        }
+        second = Some(&cur.value);
+    }
     second
 }
 
 fn main() {
-    let tree = BinaryTreeNode::from_vec(vec![4, 3, 5, 1, 6, 3, 7, 8, 2]).unwrap();
+    let mut v = vec![4, 3, 5, 1, 6, 3, 7, 8, 2];
+    let tree = BinaryTreeNode::from_vec(v.clone()).unwrap();
     let result = second_largest(&tree).unwrap();
     assert_eq!(*result, 7);
+    // tree built from the reversed list will give an identical result
+    v.reverse();
+    let rtree = BinaryTreeNode::from_vec(v).unwrap();
+    assert_eq!(result, second_largest(&rtree).unwrap());
     println!("second largest: {}", result);
 }
