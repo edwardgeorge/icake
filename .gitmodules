@@ -1,3 +1,4 @@
 [submodule "icake357"]
 	path = icake357
 	url = https://github.com/edwardgeorge/rdupes.git
+	branch = master
