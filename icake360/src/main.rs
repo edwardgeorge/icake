@@ -14,7 +14,7 @@ impl<A> Queue<A> {
         self.in_stack.push(item)
     }
     fn dequeue(&mut self) -> Option<A> {
-        if self.out_stack.is_empty() {
+        if self.out_stack.is_empty() && !self.in_stack.is_empty() {
             self.in_stack.reverse();
             std::mem::swap(&mut self.in_stack, &mut self.out_stack);
         }
