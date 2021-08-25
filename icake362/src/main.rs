@@ -27,28 +27,29 @@ impl<'a, A> From<&'a Node<A>> for NodeInOrderTraversal<'a, A> {
 impl<'a, A> Iterator for NodeInOrderTraversal<'a, A> {
     type Item = &'a A;
     fn next(&mut self) -> Option<Self::Item> {
-        loop {
-            match self.events.pop() {
-                Some(TraverseEvent::New(e)) => {
-                    if let Some(left) = e.left.as_ref() {
-                        self.events.push(TraverseEvent::VisitingLeft(e));
-                        self.events.push(TraverseEvent::New(left));
+        match self.events.pop() {
+            Some(TraverseEvent::New(e)) => {
+                let mut cur = e;
+                loop {
+                    if let Some(left) = cur.left.as_ref() {
+                        self.events.push(TraverseEvent::VisitingLeft(cur));
+                        cur = left;
                     } else {
                         // short-circuit a loop by not appending a VisitingLeft event
-                        if let Some(right) = e.right.as_ref() {
+                        if let Some(right) = cur.right.as_ref() {
                             self.events.push(TraverseEvent::New(right));
                         }
-                        return Some(&e.value);
+                        return Some(&cur.value);
                     }
                 }
-                Some(TraverseEvent::VisitingLeft(e)) => {
-                    if let Some(right) = e.right.as_ref() {
-                        self.events.push(TraverseEvent::New(right));
-                    }
-                    return Some(&e.value);
-                }
-                None => return None,
             }
+            Some(TraverseEvent::VisitingLeft(e)) => {
+                if let Some(right) = e.right.as_ref() {
+                    self.events.push(TraverseEvent::New(right));
+                }
+                Some(&e.value)
+            }
+            None => None,
         }
     }
 }
